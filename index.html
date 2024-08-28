@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>test</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.6.0/mapbox-gl.js"></script>
+
+<style>
+body { margin:0; padding:0;}
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0px;
+  width: 100%;
+}
+</style>
+<body>
+
+<div id='map'></div>
+
+
+<script>
+
+mapboxgl.accessToken = 'pk.eyJ1IjoibWdocyIsImEiOiJja3M5cmN4MXYxN3dlMm9vY24xNG95ZXE5In0.1dOJXZWGqSlt6YLU8yCCig';
+const map = new mapboxgl.Map({
+  container: 'map', // container ID
+  hash: true, //add #position on URL
+  style: './style.json', // stylesheet location
+  center: [139.765074, 35.681763], // starting position [lng, lat]
+  zoom: 17, // starting zoom
+});
+
+map.showTileBoundaries = false;
+
+
+const makePopupHtml = (prop) => {
+  
+  let htmlString = ""; //ポップアップ
+  let featureProperties = "";
+  for(name in prop){
+    if(name != "rank" && name != "interval"){
+      featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#555555;'>" + name + "</td>"
+                        + "<td style='color:#000000;'>" + prop[name] + "</td></tr>";
+    }
+  }
+  htmlString = htmlString + "<table class='popup-table'>" + featureProperties + "</table>";
+  
+  return htmlString;
+  
+}
+
+const popup = new mapboxgl.Popup();
+map.on('click', function(e) {
+  
+  //初期化
+  popup.remove();
+  
+  //レンダリングされた地物を取得
+  const sv = 3;
+  const bb = [
+    [e.point.x - sv, e.point.y - sv],
+    [e.point.x + sv, e.point.y + sv]
+  ];
+  const features = map.queryRenderedFeatures(bb);
+  
+  if (!features.length) {
+    popup.remove();
+    return;
+  }
+  
+  //ポップアップ表示処理
+  let htmlString = "";
+  features.forEach( feature => {
+//    htmlString = htmlString + "<code>" + JSON.stringify(feature, null, 2) + "</code>";
+    console.log(feature);
+  });
+  
+  if (!htmlString || htmlString == "") {
+    popup.remove();
+    return;
+  }
+  
+   
+  popup.setLngLat([ e.lngLat.lng, e.lngLat.lat ])
+    .setHTML(htmlString)
+    .addTo(map);
+});
+
+
+
+</script>
+
+</body>
+</html>
